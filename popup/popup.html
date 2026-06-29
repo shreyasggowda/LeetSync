@@ -10,7 +10,7 @@
     <main class="popup-shell">
       <section class="hero">
         <p class="eyebrow">Chrome Extension</p>
-        <h1>LeetSync</h1>
+        <h1><img src="../icons/icon48.png" width="24" height="24" style="vertical-align: middle; border-radius: 4px;" alt=""/> LeetSync</h1>
         <p class="subtitle">Ship accepted LeetCode solutions into GitHub without the copy-paste routine.</p>
         <div class="oauth-row">
           <button id="oauth-login" type="button">Connect GitHub</button>
@@ -20,7 +20,10 @@
       </section>
 
       <section class="status-card">
-        <p class="label">Sync Status</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <p class="label">Sync Status</p>
+          <button id="manual-sync" type="button" class="secondary" style="font-size: 11px; padding: 4px 8px; width: auto; flex: 0 0 auto; margin: 0;" title="Force sync the current problem">Force Sync</button>
+        </div>
         <p id="sync-state" class="status-pill">Loading...</p>
         <p id="last-sync" class="muted">No sync yet.</p>
         <p id="last-error" class="error-text"></p>
@@ -49,7 +52,7 @@
         <div class="form-header">
           <div>
             <p class="meta-title">Repository Setup</p>
-            <p id="repo-setup-hint" class="helper-text">Connect GitHub first, then save where solutions should be pushed.</p>
+            <p id="repo-setup-hint" class="helper-text">Where should your LeetCode solutions be saved?</p>
           </div>
         </div>
 
@@ -62,9 +65,13 @@
           <input id="branch" name="branch" type="text" placeholder="main" />
         </label>
 
+        <label style="flex-direction: row; align-items: center; cursor: pointer; margin-top: 2px;">
+          <input id="auto-create" name="autoCreate" type="checkbox" style="width: auto; margin: 0; accent-color: var(--accent);" />
+          <span style="font-size: 12px;">Create repository if it doesn't exist</span>
+        </label>
+
         <div class="action-row">
-          <button id="save-repo" type="submit">Save Repo</button>
-          <button id="manual-sync" type="button" class="secondary">Sync Now</button>
+          <button id="save-repo" type="submit">Link / Create Repository</button>
         </div>
       </form>
     </main>

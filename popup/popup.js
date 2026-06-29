@@ -11,8 +11,9 @@ const elements = {
   syncState: document.getElementById("sync-state"),
   lastSync: document.getElementById("last-sync"),
   lastError: document.getElementById("last-error"),
-  repositoryName: document.getElementById("repository-name"),
-  branch: document.getElementById("branch")
+  repoName: document.getElementById("repository-name"),
+  branch: document.getElementById("branch"),
+  autoCreate: document.getElementById("auto-create")
 };
 
 bootstrap();
@@ -43,23 +44,40 @@ elements.oauthLogout.addEventListener("click", async () => {
 
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const originalText = elements.saveRepo.textContent;
+  elements.saveRepo.textContent = "Connecting...";
+  elements.saveRepo.disabled = true;
+  elements.lastError.textContent = "";
+
   try {
     const payload = {
-      repositoryName: elements.repositoryName.value.trim(),
-      branch: elements.branch.value.trim() || "main"
+      repositoryName: elements.repoName.value.trim(),
+      branch: elements.branch.value.trim() || "main",
+      createRepositoryIfMissing: elements.autoCreate.checked
     };
 
     const response = await sendMessage({
       type: MESSAGE_TYPES.SAVE_SETTINGS,
       payload
     });
+    
     if (response.settings) {
-      elements.repositoryName.value = response.settings.repositoryName || "";
+      elements.repoName.value = response.settings.repositoryName || "";
     }
-    elements.lastError.textContent = "";
+    
+    elements.saveRepo.textContent = "Successfully Connected!";
+    elements.saveRepo.style.background = "var(--success)";
+    setTimeout(() => {
+      elements.saveRepo.textContent = originalText;
+      elements.saveRepo.style.background = "";
+    }, 2500);
+
     await refreshStatus();
   } catch (error) {
     elements.lastError.textContent = error.message;
+    elements.saveRepo.textContent = originalText;
+  } finally {
+    elements.saveRepo.disabled = false;
   }
 });
 
@@ -80,9 +98,11 @@ async function bootstrap() {
 
 async function loadSettings() {
   const response = await sendMessage({ type: MESSAGE_TYPES.LOAD_SETTINGS });
-  const settings = { ...DEFAULT_SETTINGS, ...(response.settings || {}) };
-  elements.repositoryName.value = settings.repositoryName || "";
-  elements.branch.value = settings.branch || "main";
+  if (response?.settings) {
+    elements.repoName.value = response.settings.repositoryName || "";
+    elements.branch.value = response.settings.branch || "main";
+    elements.autoCreate.checked = response.settings.createRepositoryIfMissing !== false;
+  }
 }
 
 async function refreshStatus() {
@@ -129,7 +149,19 @@ function renderAuthSession(session) {
   }
 
   if (session.state === "PENDING") {
-    elements.oauthStatus.textContent = `Open GitHub and enter code ${session.userCode}.`;
+    elements.oauthStatus.innerHTML = `Open GitHub and enter code:<div class="device-code-container">${renderDeviceCode(session.userCode)}</div>`;
+    
+    const copyBtn = document.getElementById("copy-code-btn");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(session.userCode);
+        copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        setTimeout(() => {
+          copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+        }, 2000);
+      });
+    }
+
     elements.oauthLogout.classList.add("hidden");
     elements.oauthLogin.classList.remove("hidden");
     elements.oauthLogin.textContent = "Waiting for GitHub...";
@@ -154,7 +186,7 @@ function renderAuthSession(session) {
 
 function setRepositorySetupEnabled(enabled) {
   const fields = [
-    elements.repositoryName,
+    elements.repoName,
     elements.branch,
     elements.saveRepo,
     elements.manualSync
@@ -205,4 +237,20 @@ function sendMessage(message) {
       resolve(response);
     });
   });
+}
+
+function renderDeviceCode(code) {
+  if (!code) return "";
+  const boxes = code.split('').map(char => {
+    if (char === '-') return `<span class="code-dash">-</span>`;
+    return `<div class="code-box">${char}</div>`;
+  }).join('');
+
+  return `${boxes}
+    <button id="copy-code-btn" class="copy-btn" title="Copy code">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    </button>`;
 }

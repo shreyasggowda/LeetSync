@@ -22,8 +22,20 @@ async function githubRequest(url, token, options = {}) {
   }
 
   if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`GitHub API error (${response.status}): ${body}`);
+    const bodyText = await response.text();
+    let errorMessage = bodyText;
+    try {
+      const json = JSON.parse(bodyText);
+      errorMessage = json.message || bodyText;
+      if (response.status === 422 && json.errors?.length > 0) {
+        errorMessage = `${json.message}: ${json.errors.map(e => e.message).join(", ")}`;
+      } else if (response.status === 401 || response.status === 403) {
+        errorMessage = `GitHub access denied. Please sign out and reconnect. (${json.message})`;
+      }
+    } catch (e) {
+      // Body wasn't JSON
+    }
+    throw new Error(`GitHub Error: ${errorMessage}`);
   }
 
   return response.json();

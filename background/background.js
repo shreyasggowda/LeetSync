@@ -129,8 +129,8 @@ async function saveUserSettings(settings) {
   });
 
   if (!existingRepo) {
-    if (!settings.createRepositoryIfMissing) {
-      throw new Error(`Repository ${repositoryOwner}/${repositoryName} was not found. Enter an existing repo name or enable auto-create.`);
+    if (!normalizedSettings.createRepositoryIfMissing) {
+      throw new Error(`Repository '${repositoryOwner}/${repositoryName}' not found. Check the "Create repository if it doesn't exist" box and try again.`);
     }
 
     if (repositoryOwner !== user.login) {
@@ -140,7 +140,8 @@ async function saveUserSettings(settings) {
     await createRepository({
       token: accessToken,
       name: repositoryName,
-      description: "Automatically synced LeetCode solutions from LeetSync."
+      description: "Automatically synced LeetCode solutions from LeetSync.",
+      isPrivate: true
     });
   }
 
