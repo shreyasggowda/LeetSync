@@ -17,6 +17,8 @@ export function generateReadme(solution) {
 - Languages Used: ${languagesUsed}
 - Runtime: ${solution.runtime || "Unknown"}
 - Memory: ${solution.memory || "Unknown"}
+- Time Complexity: ${solution.timeComplexity || "Unknown"}
+- Space Complexity: ${solution.spaceComplexity || "Unknown"}
 - Solve Mode: ${solveMode}
 - First Solved: ${metadata.firstSolved || solution.submissionTime || new Date().toLocaleString()}
 - Last Solved: ${metadata.lastSolved || solution.submissionTime || new Date().toLocaleString()}

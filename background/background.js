@@ -70,7 +70,8 @@ async function handleMessage(message) {
         lastSync: await getLastSync(),
         syncHistory: await getSyncHistory(),
         lastError: await getLastError(),
-        pendingSolution: await getPendingSolution()
+        pendingSolution: await getPendingSolution(),
+        problemStats: await getProblemStats()
       };
     case MESSAGE_TYPES.SAVE_SETTINGS:
       return saveUserSettings(message.payload);

@@ -59,13 +59,17 @@
 
     syncState.lastAcceptedKey = acceptanceKey;
     try {
-      await chrome.runtime.sendMessage({
+      const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.SOLUTION_DETECTED,
         payload: {
           ...solution,
           status: submissionStatus
         }
       });
+      
+      if (response && response.ok && response.message && response.message.includes("Synced")) {
+        showSuccessIndicator();
+      }
     } catch (error) {
       if (isExtensionContextInvalidated(error)) {
         stopBackgroundWork();
@@ -81,6 +85,20 @@
       syncState.observer.disconnect();
       syncState.observer = null;
     }
+  }
+
+  function showSuccessIndicator() {
+    const titleElement = document.querySelector('[data-cy="question-title"]') || document.querySelector('div.text-title-large a') || document.querySelector('h1');
+    if (!titleElement) return;
+
+    const indicatorId = "leetsync-success-indicator";
+    if (document.getElementById(indicatorId)) return;
+
+    const span = document.createElement("span");
+    span.id = indicatorId;
+    span.innerHTML = ' <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" style="vertical-align: middle; fill: #28a745; margin-left: 8px;" title="Synced to GitHub by LeetSync"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>';
+    
+    titleElement.appendChild(span);
   }
 
   function isRuntimeAvailable() {
@@ -133,6 +151,7 @@
     const pageText = document.body?.innerText || "";
     const submissionId = extractSubmissionId();
     const code = extractCode();
+    const complexity = extractComplexity(code);
 
     return {
       title: extractTitle(),
@@ -140,6 +159,8 @@
       language: extractLanguage(code),
       runtime: extractMetric(pageText, "Runtime"),
       memory: extractMetric(pageText, "Memory"),
+      timeComplexity: complexity.time,
+      spaceComplexity: complexity.space,
       code,
       tags: extractTags(),
       url: location.href,
@@ -295,6 +316,19 @@
     return Array.from(document.querySelectorAll('a[href*="/tag/"]'))
       .map((node) => node.textContent?.trim())
       .filter(Boolean);
+  }
+
+  function extractComplexity(code) {
+    const timeRegex = /(?:Time\s*Complexity|Time|TC)\s*[:=]?\s*(O\([^)]+\))/i;
+    const spaceRegex = /(?:Space\s*Complexity|Space|SC)\s*[:=]?\s*(O\([^)]+\))/i;
+    
+    const timeMatch = code.match(timeRegex);
+    const spaceMatch = code.match(spaceRegex);
+    
+    return {
+      time: timeMatch ? timeMatch[1] : null,
+      space: spaceMatch ? spaceMatch[1] : null
+    };
   }
 
   function extractSubmissionId() {

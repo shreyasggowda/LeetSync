@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo-text.png" alt="LeetSync Logo" width="400" />
+</p>
+
 # LeetSync
 
 LeetSync is a Chrome extension MVP that detects accepted LeetCode submissions and syncs them into a GitHub repository with a clean problem folder structure.

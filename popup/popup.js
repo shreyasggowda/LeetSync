@@ -93,6 +93,29 @@ async function refreshStatus() {
     : "No sync yet.";
   elements.lastError.textContent = response.lastError || "";
   renderAuthSession(response.authSession);
+  renderDashboard(response.problemStats);
+}
+
+function renderDashboard(problemStats) {
+  if (!problemStats || Object.keys(problemStats).length === 0) {
+    document.getElementById("dashboard-section").style.display = "none";
+    return;
+  }
+
+  document.getElementById("dashboard-section").style.display = "block";
+  
+  let easy = 0, medium = 0, hard = 0;
+  for (const key in problemStats) {
+    const diff = problemStats[key].difficulty;
+    if (diff === "Easy") easy++;
+    else if (diff === "Medium") medium++;
+    else if (diff === "Hard") hard++;
+  }
+
+  document.getElementById("stat-easy").textContent = easy;
+  document.getElementById("stat-medium").textContent = medium;
+  document.getElementById("stat-hard").textContent = hard;
+  document.getElementById("stat-total").textContent = (easy + medium + hard);
 }
 
 function renderAuthSession(session) {
