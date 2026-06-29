@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeetSync</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup-shell">
+      <section class="hero">
+        <p class="eyebrow">Chrome Extension</p>
+        <h1>LeetSync</h1>
+        <p class="subtitle">Ship accepted LeetCode solutions into GitHub without the copy-paste routine.</p>
+        <div class="oauth-row">
+          <button id="oauth-login" type="button">Connect GitHub</button>
+          <button id="oauth-logout" type="button" class="secondary hidden">Sign out</button>
+        </div>
+        <p id="oauth-status" class="helper-text">Not connected yet.</p>
+      </section>
+
+      <section class="status-card">
+        <p class="label">Sync Status</p>
+        <p id="sync-state" class="status-pill">Loading...</p>
+        <p id="last-sync" class="muted">No sync yet.</p>
+        <p id="last-error" class="error-text"></p>
+      </section>
+
+      <form id="settings-form" class="settings-form">
+        <div class="form-header">
+          <div>
+            <p class="meta-title">Repository Setup</p>
+            <p id="repo-setup-hint" class="helper-text">Connect GitHub first, then save where solutions should be pushed.</p>
+          </div>
+        </div>
+
+        <label>
+          Repository Name
+          <input id="repository-name" name="repositoryName" type="text" placeholder="my-leetcode-solutions" />
+        </label>
+        <label>
+          Branch
+          <input id="branch" name="branch" type="text" placeholder="main" />
+        </label>
+
+        <div class="action-row">
+          <button id="save-repo" type="submit">Save Repo</button>
+          <button id="manual-sync" type="button" class="secondary">Sync Now</button>
+        </div>
+      </form>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

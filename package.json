@@ -1,0 +1,15 @@
+{
+  "name": "leetsync",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension to sync accepted LeetCode submissions to GitHub.",
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{js,json,css,html,md}\"",
+    "check": "node --check background/background.js && node --check popup/popup.js && node --check github/githubApi.js"
+  },
+  "devDependencies": {
+    "eslint": "^9.30.0",
+    "prettier": "^3.6.2"
+  }
+}
